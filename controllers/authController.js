@@ -105,7 +105,7 @@ exports.authenticateToken = function (req, res, next) {
   jwt.verify(reqToken, process.env.ACCESS_TOKEN_SECRET, (err, decodedUser) => {
     if (err) {
       console.log(err.message);
-      return res.status(403).json({ error: "Invalid access token" });
+      return res.status(403).json({ error: err.message });
     }
     req.userId = decodedUser.id;
     next();

@@ -4,7 +4,8 @@ const rideSchema = mongoose.Schema({
   title: {
     type: String,
     required: true,
-    min: 1,
+    min: 3,
+    unique: true,
   },
 
   creator: {
@@ -13,7 +14,21 @@ const rideSchema = mongoose.Schema({
     ref: "User",
   },
 
+  drivers: [
+    {
+      default: [],
+      required: false,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
+
   is_public: {
+    type: Boolean,
+    default: false,
+  },
+
+  is_active: {
     type: Boolean,
     default: false,
   },
@@ -38,7 +53,7 @@ const rideSchema = mongoose.Schema({
           required: true,
           validate: {
             validator: (value) => {
-              const re = /[0-9][0-9]:[0-9][0-9]/;
+              const re = /[0-9]?[0-9]:[0-9][0-9] (AM|PM)/;
               return value.match(re);
             },
             error: "Please enter valid repeatition times",
@@ -63,11 +78,13 @@ const rideSchema = mongoose.Schema({
   start_point: {
     longitude: { type: mongoose.Types.Decimal128, required: true },
     latitude: { type: mongoose.Types.Decimal128, required: true },
+    address: { type: String, required: false },
   },
 
   end_point: {
     longitude: { type: mongoose.Types.Decimal128, required: true },
     latitude: { type: mongoose.Types.Decimal128, required: true },
+    address: { type: String, required: false },
   },
 
   key_points: [
@@ -76,23 +93,32 @@ const rideSchema = mongoose.Schema({
       required: false,
       longitude: { type: mongoose.Types.Decimal128, required: true },
       latitude: { type: mongoose.Types.Decimal128, required: true },
+      address: { type: String, required: false },
     },
   ],
 
-  one_time_date: { type: Date, required: false, default: null },
+  one_time_date: {
+    type: String,
+    required: false,
+    default: null,
+    validate: {
+      validator: (value) => {
+        if (!value) return true;
+        const re =
+          /[0-9]{4,4}-[0-9]{2,2}-[0-9]{2,2} [0-9][0-9]:[0-9][0-9] (AM|PM)/;
+        return value.match(re);
+      },
+      error: "Please enter valid repeatition times",
+    },
+  },
 });
 
 rideSchema.pre("save", async function (next) {
   try {
+    if (!this.isNew) next();
     if (this.is_public) next();
-    if (!this.isModified("creator")) return next();
-    const ownerId = this.creator;
-    owner = await require("./user").findById(ownerId);
-    if (!owner) next("Ride owner could not be found");
-    owner.private_rides.push(this._id);
-    owner = await owner.save();
-    if (owner) next();
-    else next("Owner could not be edited");
+    const key = require("crypto").randomBytes(16).toString("base64");
+    this.access_key = key;
   } catch (error) {
     console.log("Unexpected error while saving ride::");
     console.log(error.message);

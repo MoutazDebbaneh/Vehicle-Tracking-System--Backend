@@ -37,10 +37,24 @@ rideRouter.get(
   (req, res) => rideController.getMany(req, res, "all")
 );
 
+rideRouter.get("/ownPrivate", authController.authenticateToken, (req, res) =>
+  rideController.ownPrivate(req, res)
+);
+
+rideRouter.get("/own", authController.authenticateToken, (req, res) =>
+  rideController.own(req, res)
+);
+
 rideRouter.get(
   "/:id",
   authController.authenticateToken,
   rideController.getById
+);
+
+rideRouter.patch(
+  "/addPrivateRide",
+  authController.authenticateToken,
+  rideController.addPrivateRide
 );
 
 module.exports = rideRouter;

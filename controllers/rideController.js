@@ -1,5 +1,7 @@
+const { Error } = require("mongoose");
 const Ride = require("../models/ride");
 const User = require("../models/user");
+const UserController = require("./userController");
 
 exports.add = async function (req, res) {
   try {
@@ -122,11 +124,11 @@ exports.getMany = function (req, res, type) {
     if (limit) options["limit"] = limit;
 
     Ride.find(filter, null, options, function (err, rides) {
-      if (err) return res.status(500).json({ error: error.message });
+      if (err) return res.status(500).json({ error: err.message });
       return res.json({ count: rides.length, rides });
     });
-  } catch (error) {
-    return res.status(500).json({ error: error.message });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
   }
 };
 
@@ -163,6 +165,86 @@ exports.update = async function (req, res) {
 
     ride = await ride.save();
     res.json(ride);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+exports.ownPrivate = async function (req, res, type) {
+  try {
+    //Should be called after authenticateToken() only
+    const userId = req.userId;
+
+    User.findById(userId)
+      .populate("private_rides")
+      .exec(function (err, rides) {
+        if (err) throw new Error(err.message);
+        return res.json({
+          count: rides["private_rides"].length,
+          rides: rides["private_rides"],
+        });
+      });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+exports.own = async function (req, res, type) {
+  try {
+    //Should be called after authenticateToken() only
+    const userId = req.userId;
+
+    Ride.find({ creator: userId }, null, null, function (err, rides) {
+      if (err) return res.status(500).json({ error: err.message });
+      return res.json({ count: rides.length, rides });
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+exports.addPrivateRide = async function (req, res) {
+  try {
+    //Should be called after authenticateToken() only
+    const userId = req.userId;
+    const { title, access_key } = req.body;
+
+    if (!title || !access_key)
+      return res.status(400).json({ error: "Missing required argument(s)" });
+
+    Ride.findOne({ title, access_key }, null, null, async function (err, ride) {
+      if (err) return res.status(500).json({ error: err.message });
+      if (!ride)
+        return res.status(400).json({
+          error: "No matching ride with the same access key was found",
+        });
+
+      const rideId = ride._id;
+      let isSuccess = false;
+
+      User.findById(userId.toString())
+        .exec()
+        .then(
+          async (user) => {
+            if (!user)
+              return res
+                .status(400)
+                .json({ error: "No matching user was found" });
+
+            if (user.private_rides.includes(rideId))
+              return res
+                .status(400)
+                .json({ error: "Ride is already added to this user rides" });
+
+            user.private_rides.push(rideId);
+            await user.save();
+            return res.json({ msg: "Ride is now visible to user" });
+          },
+          (err) => {
+            throw new Error(err.message);
+          }
+        );
+    });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
