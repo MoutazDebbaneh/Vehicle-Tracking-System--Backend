@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const userRouter = require("./routes/user");
 const authRouter = require("./routes/auth");
 const rideRouter = require("./routes/ride");
+const rideInstanceRouter = require("./routes/rideInstance");
 
 const app = express();
 
@@ -13,6 +14,7 @@ app.use(express.json());
 app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/ride", rideRouter);
+app.use("/api/rideInstance", rideInstanceRouter);
 
 mongoose
   .connect(process.env.DB_URL)

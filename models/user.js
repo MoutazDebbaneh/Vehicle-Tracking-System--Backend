@@ -42,6 +42,12 @@ const userSchema = mongoose.Schema({
     default: "user",
   },
 
+  current_driving_instance: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "RideInstance",
+    required: false,
+  },
+
   private_rides: [
     {
       type: mongoose.Schema.Types.ObjectId,

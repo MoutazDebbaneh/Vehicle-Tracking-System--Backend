@@ -102,7 +102,7 @@ exports.update = async function (req, res) {
     let count = 0;
 
     for (const key in reqUpdateFields) {
-      if (reqUpdateFields[key] && key in User.schema.obj && key != "id") {
+      if (key in User.schema.obj && key != "id") {
         user[key] = reqUpdateFields[key];
         count++;
       }

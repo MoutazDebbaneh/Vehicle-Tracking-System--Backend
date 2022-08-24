@@ -57,4 +57,10 @@ rideRouter.patch(
   rideController.addPrivateRide
 );
 
+rideRouter.post(
+  "/addDriver",
+  authController.authenticateToken,
+  rideController.addDriver
+);
+
 module.exports = rideRouter;

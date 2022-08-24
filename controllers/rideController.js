@@ -147,12 +147,7 @@ exports.update = async function (req, res) {
     let count = 0;
 
     for (const key in reqUpdateFields) {
-      if (
-        reqUpdateFields[key] &&
-        key in Ride.schema.obj &&
-        key != "id" &&
-        key != "creator"
-      ) {
+      if (key in Ride.schema.obj && key != "id" && key != "creator") {
         ride[key] = reqUpdateFields[key];
         count++;
       }
@@ -220,7 +215,6 @@ exports.addPrivateRide = async function (req, res) {
         });
 
       const rideId = ride._id;
-      let isSuccess = false;
 
       User.findById(userId.toString())
         .exec()
@@ -239,6 +233,54 @@ exports.addPrivateRide = async function (req, res) {
             user.private_rides.push(rideId);
             await user.save();
             return res.json({ msg: "Ride is now visible to user" });
+          },
+          (err) => {
+            throw new Error(err.message);
+          }
+        );
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+exports.addDriver = async function (req, res) {
+  try {
+    //Should be called after authenticateToken() only
+
+    const { rideId, userEmail } = req.body;
+
+    if (!rideId || !userEmail)
+      return res.status(400).json({ error: "Missing required argument(s)" });
+
+    Ride.findById(rideId, null, null, async function (err, ride) {
+      if (err) return res.status(500).json({ error: err.message });
+      if (!ride)
+        return res.status(400).json({
+          error: "No matching ride with the same access key was found",
+        });
+
+      User.findOne({ email: userEmail })
+        .exec()
+        .then(
+          async (user) => {
+            if (!user)
+              return res
+                .status(400)
+                .json({ error: "No matching user was found" });
+
+            const userId = user._id.toString();
+
+            if (ride.drivers.map((e) => e.id.toString()).includes(userId))
+              return res
+                .status(400)
+                .json({ error: "User already added as a driver to this ride" });
+
+            ride.drivers.push({ id: userId, email: user.email });
+            await ride.save();
+            return res.json({
+              msg: "User with the give email is now a driver of this ride",
+            });
           },
           (err) => {
             throw new Error(err.message);
