@@ -48,6 +48,11 @@ const rideSchema = mongoose.Schema({
     default: false,
   },
 
+  is_finished: {
+    type: Boolean,
+    default: false,
+  },
+
   access_key: {
     type: String,
     default: null,
