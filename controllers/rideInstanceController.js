@@ -107,7 +107,7 @@ exports.end = async function (req, res) {
     rideInstance.end_date = end_date;
     await rideInstance.save();
 
-    if (ride.is_repeatitive) ride.is_finished = true;
+    if (!ride.is_repeatitive) ride.is_finished = true;
 
     ride.is_active = false;
     await ride.save();
