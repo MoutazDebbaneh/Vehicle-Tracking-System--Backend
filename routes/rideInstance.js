@@ -21,4 +21,10 @@ rideInstanceRouter.patch(
   rideInstanceController.end
 );
 
+rideInstanceRouter.get(
+  "/getInstances/:rideId",
+  authController.authenticateToken,
+  rideInstanceController.getInstances
+);
+
 module.exports = rideInstanceRouter;

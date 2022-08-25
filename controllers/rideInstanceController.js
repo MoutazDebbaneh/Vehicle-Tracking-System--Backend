@@ -118,6 +118,46 @@ exports.end = async function (req, res) {
   }
 };
 
+exports.getInstances = async function (req, res) {
+  try {
+    const { rideId } = req.params;
+    const userId = req.userId;
+
+    const ride = await Ride.findById(rideId.toString());
+
+    if (!ride) return res.status(400).json({ error: "Ride was not found" });
+
+    let hasAccess = false;
+
+    if (ride.is_public) hasAccess = true;
+    else if (ride.drivers.map((e) => e.id.toString()).includes(userId))
+      hasAccess = true;
+    else {
+      const user = await User.findById(userId);
+      if (!user) return res.status(400).json({ error: "User not found" });
+      if (
+        user.private_rides
+          .map((e) => e.id.toString())
+          .includes(rideId.toString())
+      )
+        hasAccess = true;
+    }
+
+    if (!hasAccess)
+      return res.status(401).json({ error: "Unauthorized driver" });
+
+    const instances = await RideInstance.find({ ride_id: rideId }, [
+      "_id",
+      "start_date",
+      "end_date",
+    ]);
+
+    return res.json({ count: instances.length, instances });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 async function _isDriverOfRide(driverId, rideId) {
   let rideDoc = null;
   try {
