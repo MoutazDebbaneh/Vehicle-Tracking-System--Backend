@@ -183,8 +183,8 @@ exports.getById = async function (req, res) {
       hasAccess =
         user.type == "admin" ||
         user.private_rides
-          .map((e) => e.id.toString())
-          .includes(userId.toString());
+          .map((e) => e.toString())
+          .includes(instance.ride_id.toString());
     }
 
     if (!hasAccess)
