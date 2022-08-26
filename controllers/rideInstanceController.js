@@ -137,9 +137,7 @@ exports.getInstances = async function (req, res) {
       if (!user) return res.status(400).json({ error: "User not found" });
       if (
         user.type == "admin" ||
-        user.private_rides
-          .map((e) => e.id.toString())
-          .includes(rideId.toString())
+        user.private_rides.map((e) => e.toString()).includes(rideId.toString())
       )
         hasAccess = true;
     }
