@@ -3,6 +3,12 @@ const rideInstanceRouter = express.Router();
 const rideInstanceController = require("../controllers/rideInstanceController");
 const authController = require("../controllers/authController");
 
+rideInstanceRouter.get(
+  "/:instanceId",
+  authController.authenticateToken,
+  rideInstanceController.getById
+);
+
 rideInstanceRouter.post(
   "/start/:rideId",
   authController.authenticateToken,

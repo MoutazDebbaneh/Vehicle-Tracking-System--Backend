@@ -160,23 +160,38 @@ exports.getInstances = async function (req, res) {
   }
 };
 
-async function _isDriverOfRide(driverId, rideId) {
-  let rideDoc = null;
+exports.getById = async function (req, res) {
   try {
-    await Ride.findById(rideId)
-      .exec()
-      .then(
-        async (ride) => {
-          if (!ride) throw "Ride id doesn't match any rides";
+    const { instanceId } = req.params;
+    const userId = req.userId;
 
-          if (!ride.drivers.map((e) => e.id.toString()).includes(driverId))
-            throw "Unauthorized driver";
-        },
-        (err) => {
-          throw err;
-        }
-      );
+    const instance = await RideInstance.findById(instanceId);
+
+    if (!instance)
+      return res.status(400).json({ error: "Instance was not found" });
+
+    const ride = await Ride.findById(instance.ride_id);
+
+    if (!ride) return res.status(400).json({ error: "Instance was not found" });
+
+    let hasAccess = false;
+
+    if (ride.is_public) hasAccess = true;
+    else {
+      const user = await User.findById(userId);
+      if (!user) return res.status(400).json({ error: "User was not found" });
+      hasAccess =
+        user.type == "admin" ||
+        user.private_rides
+          .map((e) => e.id.toString())
+          .includes(userId.toString());
+    }
+
+    if (!hasAccess)
+      return res.status(401).json({ error: "Unauthorized access" });
+
+    return res.json(instance);
   } catch (error) {
-    throw error;
+    res.status(500).json({ error: error.message });
   }
-}
+};
