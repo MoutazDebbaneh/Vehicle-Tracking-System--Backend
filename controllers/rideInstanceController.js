@@ -136,6 +136,7 @@ exports.getInstances = async function (req, res) {
       const user = await User.findById(userId);
       if (!user) return res.status(400).json({ error: "User not found" });
       if (
+        user.type == "admin" ||
         user.private_rides
           .map((e) => e.id.toString())
           .includes(rideId.toString())
