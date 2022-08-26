@@ -148,6 +148,8 @@ exports.getInstances = async function (req, res) {
 
     const instances = await RideInstance.find({ ride_id: rideId }, [
       "_id",
+      "ride_id",
+      "driver_id",
       "start_date",
       "end_date",
     ]);
