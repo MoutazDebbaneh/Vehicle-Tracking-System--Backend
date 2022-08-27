@@ -47,7 +47,7 @@ exports.updateLocation = async function (req, res) {
     const { instanceId } = req.params;
     const driverId = req.userId;
 
-    const { rideId, latitude, longitude } = req.body;
+    const { rideId, latitude, longitude, rotation, accuracy } = req.body;
 
     if (!latitude || !longitude || !rideId)
       return res.status(400).json({ error: "Missing required argument(s)" });
@@ -66,7 +66,7 @@ exports.updateLocation = async function (req, res) {
     if (!rideInstance)
       return res.status(400).json({ error: "Ride Instance not found" });
 
-    rideInstance.path.push({ longitude, latitude });
+    rideInstance.path.push({ longitude, latitude, rotation, accuracy });
 
     await rideInstance.save();
     return res.json(rideInstance);

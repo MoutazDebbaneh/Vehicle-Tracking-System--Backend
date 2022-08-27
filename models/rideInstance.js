@@ -17,6 +17,8 @@ const rideInstanceSchema = mongoose.Schema({
     {
       longitude: { type: mongoose.Types.Decimal128, required: true },
       latitude: { type: mongoose.Types.Decimal128, required: true },
+      rotation: { type: mongoose.Types.Decimal128, required: true },
+      accuracy: { type: mongoose.Types.Decimal128, required: true },
     },
   ],
 
