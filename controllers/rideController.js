@@ -20,9 +20,18 @@ exports.add = async function (req, res) {
       }
     }
 
+    const user = await User.findById(creator);
     let ride = new Ride(payload);
 
+    if (user.type != "admin" && ride.is_public)
+      return res.status(401).json({
+        error: "You don't have permissions to perform this operation",
+      });
+
+    user.private_rides.push(ride._id);
+
     ride = await ride.save();
+    await user.save();
     res.json(ride);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -294,9 +303,9 @@ exports.addDriver = async function (req, res) {
 
 async function _isCreatorOrAdmin(ride, userId) {
   //Assumes both args are correct
-  if (ride.creator.toString() === userId) return true;
+  if (ride.creator.toString() === userId.toString()) return true;
 
-  await User.findById(userId)
+  hasAccess = await User.findById(userId)
     .exec()
     .then(
       (doc) => {
@@ -306,4 +315,6 @@ async function _isCreatorOrAdmin(ride, userId) {
         throw err.message ?? "Unexpected error";
       }
     );
+
+  return hasAccess;
 }

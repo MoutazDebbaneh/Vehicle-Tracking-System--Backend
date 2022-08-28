@@ -59,6 +59,12 @@ const rideSchema = mongoose.Schema({
     required: false,
   },
 
+  vehicle: {
+    type: String,
+    default: "Car",
+    enum: ["Car", "Bus"],
+  },
+
   is_repeatitive: { type: Boolean, default: false },
 
   repeatition: {
