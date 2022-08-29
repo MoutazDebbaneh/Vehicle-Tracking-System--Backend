@@ -11,12 +11,12 @@ const rideInstanceRouter = require("./routes/rideInstance");
 
 const app = express();
 
-app.use(cors());
 app.use(express.json());
 app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/ride", rideRouter);
 app.use("/api/rideInstance", rideInstanceRouter);
+app.use(cors());
 
 mongoose
   .connect(process.env.DB_URL)
