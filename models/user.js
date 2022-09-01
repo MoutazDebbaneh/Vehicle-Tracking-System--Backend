@@ -6,14 +6,14 @@ const userSchema = mongoose.Schema({
     required: true,
     type: String,
     trim: true,
-    min: 1,
+    min: 3,
   },
 
   last_name: {
     required: true,
     type: String,
     trim: true,
-    min: 1,
+    min: 3,
   },
 
   email: {
