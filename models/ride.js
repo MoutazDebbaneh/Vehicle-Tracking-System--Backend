@@ -22,8 +22,8 @@ const rideSchema = mongoose.Schema({
         ref: "User",
       },
       email: {
-        required: false,
         type: String,
+        required: false,
         trim: true,
         validate: {
           validator: (value) => {
