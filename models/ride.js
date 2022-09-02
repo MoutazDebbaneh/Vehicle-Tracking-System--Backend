@@ -25,7 +25,6 @@ const rideSchema = mongoose.Schema({
         required: false,
         type: String,
         trim: true,
-        unique: true,
         validate: {
           validator: (value) => {
             const re =
