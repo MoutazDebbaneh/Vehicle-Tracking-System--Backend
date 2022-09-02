@@ -24,6 +24,7 @@ const rideSchema = mongoose.Schema({
       email: {
         type: String,
         required: false,
+        unique: false,
         trim: true,
         validate: {
           validator: (value) => {
