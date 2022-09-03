@@ -3,7 +3,6 @@ const User = require("../models/user");
 exports.delete = async function (req, res) {
   try {
     const userId = req.params.id;
-
     if (!require("mongoose").Types.ObjectId.isValid(userId))
       return res.status(400).json({
         error: "Invalid user id",

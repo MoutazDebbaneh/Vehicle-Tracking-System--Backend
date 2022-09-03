@@ -3,8 +3,6 @@ const userRouter = express.Router();
 const userController = require("../controllers/userController");
 const authController = require("../controllers/authController");
 
-userRouter.post("/add", (req, res) => res.redirect("/api/auth/signup"));
-
 userRouter.delete(
   "/delete/:id",
   authController.authenticateToken,
